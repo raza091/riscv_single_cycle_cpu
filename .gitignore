@@ -1,0 +1,74 @@
+# Vivado project files
+*.xpr
+*.jou
+*.log
+*.str
+*.debug
+
+# Vivado generated directories
+.Xil/
+*.runs/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.sim/
+*.gen/
+*.hbs/
+*.srcs/utils_1/
+
+# Bitstream and implementation outputs
+*.bit
+*.bin
+*.ltx
+*.rpt
+*.dcp
+*.nametags
+*.xsa
+
+# Simulation outputs
+*.vcd
+*.wdb
+*.pb
+*.wlf
+
+# Vivado log and journal files
+vivado*.jou
+vivado*.log
+vivado_pid*.str
+webtalk*.jou
+webtalk*.log
+
+# SystemVerilog and Verilog compiled outputs
+*.v~
+*.sv~
+csrc/
+simv
+simv.daidir/
+DVEfiles/
+ucli.key
+vc_hdrs.h
+
+# Modelsim / QuestaSim
+work/
+transcript
+vsim.wlf
+*.vf
+
+# Synopsys VCS
+inter.rpt
+novas.conf
+novas.rc
+novas_dump.log
+*.fsdb
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+.vscode/
+*.bak
+*~

@@ -79,7 +79,7 @@ This repository implements a single-cycle RV32I processor where every instructio
 
 ### Machine Type
 
-This is a **Moore machine** — output depends only on current state, not on input:
+This is a **Moore machine** - output depends only on current state, not on input:
 
 ```
 Z = f(current state only)     Moore
@@ -102,15 +102,15 @@ Block 3 → Output Logic       assign                    combinational
 
 | Module               | File                       | Description                                       |
 |----------------------|----------------------------|---------------------------------------------------|
-| `riscv_top`          | `rtl/riscv_top.sv`         | Top-level — connects all 12 modules               |
+| `riscv_top`          | `rtl/riscv_top.sv`         | Top-level - connects all 12 modules               |
 | `pc`                 | `rtl/pc.sv`                | 32-bit program counter, synchronous reset         |
 | `pcadder`            | `rtl/pcadder.sv`           | Computes PC + 4                                   |
 | `addershifted`       | `rtl/addershifted.sv`      | Computes PC + imm (branch target)                 |
 | `instructionMemory`  | `rtl/instr_mem.sv`         | 32-entry instruction ROM with test program        |
 | `registerData`       | `rtl/registerData.sv`      | 32 x 32-bit register file, asynchronous read      |
 | `immediateGenerator` | `rtl/immediateGenerator.sv`| Sign-extends immediates for I, S, B-type          |
-| `control_path`       | `rtl/control_path.sv`      | Main control unit — decodes opcode                |
-| `alu_control`        | `rtl/alu_control.sv`       | ALU decoder — uses alu_op, funct3, funct7         |
+| `control_path`       | `rtl/control_path.sv`      | Main control unit - decodes opcode                |
+| `alu_control`        | `rtl/alu_control.sv`       | ALU decoder - uses alu_op, funct3, funct7         |
 | `alu`                | `rtl/alu.sv`               | 32-bit ALU supporting 9 operations                |
 | `andGate`            | `rtl/andGate.sv`           | Branch decision: branch AND Zero                  |
 | `mux2X1`             | `rtl/mux2X1.sv`            | 32-bit 2:1 multiplexer (3 instances in top)       |
@@ -296,41 +296,62 @@ t4  (size) = 5   (expect 5)
 ## Repository Structure
 
 ```
+## Repository Structure
+
+​```
 riscv_single_cycle_cpu/
 ├── rtl/
-│   ├── riscv_top.sv
-│   ├── pc.sv
-│   ├── pcadder.sv
-│   ├── addershifted.sv
-│   ├── instr_mem.sv
-│   ├── registerData.sv
-│   ├── immediateGenerator.sv
-│   ├── control_path.sv
-│   ├── alu_control.sv
-│   ├── alu.sv
-│   ├── andGate.sv
-│   ├── mux2X1.sv
-│   └── data_memory.sv
+│   ├── adder/
+│   │   └── adder.sv
+│   ├── adder_shifted/
+│   │   └── addershifted.sv
+│   ├── alu/
+│   │   └── alu.sv
+│   ├── alu_ctrl/
+│   │   └── alu_control.sv
+│   ├── andGate/
+│   │   └── andGate.sv
+│   ├── control_path/
+│   │   └── control_path.sv
+│   ├── data_memory/
+│   │   └── data_memory.sv
+│   ├── immediateGenerator/
+│   │   └── immediateGenerator.sv
+│   ├── instruction_memory/
+│   │   └── instr_mem.sv
+│   ├── mux/
+│   │   ├── mux2X1.sv
+│   │   └── mux_param.sv
+│   ├── pc/
+│   │   └── pc.sv
+│   ├── pcadder/
+│   │   └── pcadder.sv
+│   ├── registerData/
+│   │   └── registerData.sv
+│   └── riscv_top/
+│       └── riscv_top.sv
 ├── tb/
 │   ├── tb_riscv_top.sv
-│   ├── tb_pc.sv
-│   ├── tb_pcadder.sv
+│   ├── tb_riscv_top.sv
+│   ├── adder_tb.sv
 │   ├── tb_addershifted.sv
-│   ├── tb_instr_mem.sv
-│   ├── tb_registerData.sv
-│   ├── tb_immediateGenerator.sv
-│   ├── tb_control_path.sv
-│   ├── tb_alu_control.sv
 │   ├── tb_alu.sv
+│   ├── tb_alu_control.sv
 │   ├── tb_andGate.sv
+│   ├── tb_control_path.sv
+│   ├── tb_data_memory.sv
+│   ├── tb_immediateGenerator.sv
+│   ├── tb_instr_mem.sv
 │   ├── tb_mux2X1.sv
-│   └── tb_data_memory.sv
-├── docs/
-│   └── architecture/
-│       └── datapath_diagram.png
+│   ├── tb_pcadder.sv
+│   ├── tb_registerData.sv
+│   └── mux_param_tb.sv
+├── mem/
+│   └── program.hex
 ├── .gitignore
 ├── LICENSE
 └── README.md
+​```
 ```
 
 ---

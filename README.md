@@ -378,7 +378,7 @@ riscv_single_cycle_cpu/
 
 ## Author
 
-**Ali Raza** — Embedded Systems and IC Design Engineer
+**Ali Raza Tariq** - Embedded Systems and IC Design Engineer
 
 - Program: Government of Pakistan IC Design and Verification Cohort 1
 - Background: Embedded Systems, FPGA Development, PCB Design, Quantum Photonics Research
@@ -388,4 +388,4 @@ riscv_single_cycle_cpu/
 
 ## License
 
-MIT License — free to use, modify, and distribute with attribution.
+MIT License - free to use, modify, and distribute with attribution.

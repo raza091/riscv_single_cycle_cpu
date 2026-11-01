@@ -64,7 +64,7 @@ module instructionMemory
         // add t6, t0, t5
         mem[16] = 32'h01E28FB3;
         // lw t1, 0(t6)
-        mem[17] = 32'h000FB303;
+        mem[17] = 32'h000FA303;
         // add t2, t2, t1
         mem[18] = 32'h006383B3;
         // addi t3, t3, 1

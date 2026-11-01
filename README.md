@@ -6,7 +6,7 @@
 ![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-A fully verified from-scratch implementation of a 32-bit single-cycle RISC-V processor (RV32I subset) in SystemVerilog, built as part of the **Government of Pakistan IC Design & Verification Cohort 1** program.
+A from-scratch implementation of a 32-bit single-cycle RISC-V processor (RV32I subset) in SystemVerilog, built as part of the **Government of Pakistan IC Design & Verification Cohort 1** program.
 
 ---
 
@@ -77,24 +77,9 @@ This repository implements a single-cycle RV32I processor where every instructio
             | data_write --> registerData (write back)
 ```
 
-### Machine Type
+### Design Style
 
-This is a **Moore machine** - output depends only on current state, not on input:
-
-```
-Z = f(current state only)     Moore
-Z = f(current state, input)   Mealy (not used here)
-```
-
-### Three-Block RTL Structure
-
-Every module follows this standard pattern:
-
-```
-Block 1 → State Register     always @(posedge clk)     sequential
-Block 2 → Next State Logic   always @(*) or assign     combinational
-Block 3 → Output Logic       assign                    combinational
-```
+Control and datapath are combinational. State lives only in the program counter, the register file and the data memory, all updated on the clock edge. The register file and data memory read asynchronously.
 
 ---
 
@@ -102,19 +87,19 @@ Block 3 → Output Logic       assign                    combinational
 
 | Module               | File                       | Description                                       |
 |----------------------|----------------------------|---------------------------------------------------|
-| `riscv_top`          | `rtl/riscv_top.sv`         | Top-level - connects all 12 modules               |
-| `pc`                 | `rtl/pc.sv`                | 32-bit program counter, synchronous reset         |
-| `pcadder`            | `rtl/pcadder.sv`           | Computes PC + 4                                   |
-| `addershifted`       | `rtl/addershifted.sv`      | Computes PC + imm (branch target)                 |
-| `instructionMemory`  | `rtl/instr_mem.sv`         | 32-entry instruction ROM with test program        |
-| `registerData`       | `rtl/registerData.sv`      | 32 x 32-bit register file, asynchronous read      |
-| `immediateGenerator` | `rtl/immediateGenerator.sv`| Sign-extends immediates for I, S, B-type          |
-| `control_path`       | `rtl/control_path.sv`      | Main control unit - decodes opcode                |
-| `alu_control`        | `rtl/alu_control.sv`       | ALU decoder - uses alu_op, funct3, funct7         |
-| `alu`                | `rtl/alu.sv`               | 32-bit ALU supporting 9 operations                |
-| `andGate`            | `rtl/andGate.sv`           | Branch decision: branch AND Zero                  |
-| `mux2X1`             | `rtl/mux2X1.sv`            | 32-bit 2:1 multiplexer (3 instances in top)       |
-| `data_memory`        | `rtl/data_memory.sv`       | 256 x 32-bit data memory                         |
+| `riscv_top`          | `rtl/riscv_top/riscv_top.sv`         | Top-level - connects all 12 modules               |
+| `pc`                 | `rtl/pc/pc.sv`                | 32-bit program counter, synchronous reset         |
+| `pcadder`            | `rtl/pcadder/pcadder.sv`           | Computes PC + 4                                   |
+| `addershifted`       | `rtl/adder_shifted/addershifted.sv`      | Computes PC + imm (branch target)                 |
+| `instructionMemory`  | `rtl/instruction_memory/instr_mem.sv`         | 32-entry instruction ROM with test program        |
+| `registerData`       | `rtl/registerData/registerData.sv`      | 32 x 32-bit register file, asynchronous read      |
+| `immediateGenerator` | `rtl/immediateGenerator/immediateGenerator.sv`| Sign-extends immediates for I, S, B-type          |
+| `control_path`       | `rtl/control_path/control_path.sv`      | Main control unit - decodes opcode                |
+| `alu_control`        | `rtl/alu_ctrl/alu_control.sv`       | ALU decoder - uses alu_op, funct3, funct7         |
+| `alu`                | `rtl/alu/alu.sv`               | 32-bit ALU supporting 9 operations                |
+| `andGate`            | `rtl/andGate/andGate.sv`           | Branch decision: branch AND Zero                  |
+| `mux2X1`             | `rtl/mux/mux2X1.sv`            | 32-bit 2:1 multiplexer (3 instances in top)       |
+| `data_memory`        | `rtl/data_memory/data_memory.sv`       | 256 x 32-bit data memory                         |
 
 ---
 
@@ -244,7 +229,7 @@ beq   x0, x0, done    ; infinite loop
 | 0x38    | `01DE0E63`   | `beq t3, t4, done (+28)`    |
 | 0x3C    | `002E1F13`   | `slli t5, t3, 2`            |
 | 0x40    | `01E28FB3`   | `add t6, t0, t5`            |
-| 0x44    | `000FB303`   | `lw t1, 0(t6)`              |
+| 0x44    | `000FA303`   | `lw t1, 0(t6)`              |
 | 0x48    | `006383B3`   | `add t2, t2, t1`            |
 | 0x4C    | `001E0E13`   | `addi t3, t3, 1`            |
 | 0x50    | `FE0004E3`   | `beq x0, x0, loop (-24)`    |
@@ -254,9 +239,13 @@ beq   x0, x0, done    ; infinite loop
 
 ## Simulation
 
-Run `tb_riscv_top.sv` in Vivado behavioral simulation.
+Run `tb/tb_riscv_top.sv` in Vivado behavioral simulation, or from the command line with Icarus Verilog:
 
-The testbench monitors every signal on every clock edge and prints final register values:
+```bash
+iverilog -g2012 -o sim.out $(find rtl -name '*.sv') tb/tb_riscv_top.sv && vvp sim.out
+```
+
+The self-checking testbench runs the program, compares the final register values to the expected ones and prints PASS or FAIL:
 
 ```
 ─────────────────────────────────
@@ -265,6 +254,7 @@ Simulation complete
 t2  (sum)  = 123 (expect 123)
 t3  (i)    = 5   (expect 5)
 t4  (size) = 5   (expect 5)
+PASS
 ─────────────────────────────────
 ```
 
@@ -296,62 +286,25 @@ t4  (size) = 5   (expect 5)
 ## Repository Structure
 
 ```
-## Repository Structure
-
-​```
 riscv_single_cycle_cpu/
 ├── rtl/
-│   ├── adder/
-│   │   └── adder.sv
-│   ├── adder_shifted/
-│   │   └── addershifted.sv
-│   ├── alu/
-│   │   └── alu.sv
-│   ├── alu_ctrl/
-│   │   └── alu_control.sv
-│   ├── andGate/
-│   │   └── andGate.sv
-│   ├── control_path/
-│   │   └── control_path.sv
-│   ├── data_memory/
-│   │   └── data_memory.sv
-│   ├── immediateGenerator/
-│   │   └── immediateGenerator.sv
-│   ├── instruction_memory/
-│   │   └── instr_mem.sv
-│   ├── mux/
-│   │   ├── mux2X1.sv
-│   │   └── mux_param.sv
-│   ├── pc/
-│   │   └── pc.sv
-│   ├── pcadder/
-│   │   └── pcadder.sv
-│   ├── registerData/
-│   │   └── registerData.sv
-│   └── riscv_top/
-│       └── riscv_top.sv
-├── tb/
-│   ├── tb_riscv_top.sv
-│   ├── tb_riscv_top.sv
-│   ├── adder_tb.sv
-│   ├── tb_addershifted.sv
-│   ├── tb_alu.sv
-│   ├── tb_alu_control.sv
-│   ├── tb_andGate.sv
-│   ├── tb_control_path.sv
-│   ├── tb_data_memory.sv
-│   ├── tb_immediateGenerator.sv
-│   ├── tb_instr_mem.sv
-│   ├── tb_mux2X1.sv
-│   ├── tb_pcadder.sv
-│   ├── tb_registerData.sv
-│   └── mux_param_tb.sv
-├── mem/
-│   └── program.hex
-├── .gitignore
+│   ├── adder/            adder.sv
+│   ├── adder_shifted/    addershifted.sv
+│   ├── alu/              alu.sv
+│   ├── alu_ctrl/         alu_control.sv
+│   ├── andGate/          andGate.sv
+│   ├── control_path/     control_path.sv
+│   ├── data_memory/      data_memory.sv
+│   ├── immediateGenerator/ immediateGenerator.sv
+│   ├── instruction_memory/ instr_mem.sv
+│   ├── mux/              mux2X1.sv, mux_param.sv
+│   ├── pc/               pc.sv
+│   ├── pcadder/          pcadder.sv
+│   ├── registerData/     registerData.sv
+│   └── riscv_top/        riscv_top.sv
+├── tb/                   one testbench per module + tb_riscv_top.sv
 ├── LICENSE
 └── README.md
-​```
 ```
 
 ---
